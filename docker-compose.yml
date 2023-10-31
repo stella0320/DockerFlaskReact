@@ -1,19 +1,33 @@
 version: "3.9"
 services:
   server:
-    build:  ./server
+    build: ./server
     ports: 
-    - "5000:5000"
+      - "5000:5000"
+    expose:
+      - 5000
     volumes: 
     - ./server:/app
     environment: 
       FLASK_ENV: development
-  web:
-    build: ./client/my-app 
+  client:
+    build: 
+      context: ./client/app
+      dockerfile: Dockerfile
     ports: 
       - "3000:3000"
     volumes: 
-      - ./client/my-app:/user/src/app
+      - ./client/app:/user/src/app
     depends_on: 
       - server
 
+  nginx:
+      build:
+        context: ./nginx
+        dockerfile: Dockerfile
+      restart: unless-stopped
+      ports:
+        - 8080:8080
+      depends_on:
+        - server
+        - client
